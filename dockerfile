@@ -23,4 +23,5 @@ EXPOSE 5000
 
 # 6. Run the application using Gunicorn (Production Server)
 # "app:app" means "module_name:variable_name"
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+
+CMD "gunicorn", "--bind", "0.0.0.0:5000", "app:app"

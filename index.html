@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kannada Chandas Identifier | ಕನ್ನಡ ಛಂದಸ್ಸು</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@300;400;500;700&family=Tiro+Kannada:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans Kannada"', 'sans-serif'],
+                        serif: ['"Tiro Kannada"', 'serif'],
+                    },
+                    colors: {
+                        'kannada-gold': '#d97706',
+                        'kannada-red': '#991b1b',
+                        'parchment': '#fbf7f1',
+                        'ink': '#292524',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
+        .laghu-badge { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .guru-badge { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .page-break-avoid { page-break-inside: avoid; }
+    </style>
+</head>
+<body class="bg-parchment text-ink min-h-screen flex flex-col font-sans selection:bg-amber-200">
+
+    <div class="h-2 w-full bg-gradient-to-r from-amber-700 via-amber-500 to-amber-700"></div>
+
+    <!-- HEADER -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-stone-200 shadow-sm no-print">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-700 font-serif font-bold text-2xl border border-amber-200 overflow-hidden">
+                    <img src="logo.png" alt="Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; this.parentElement.innerText='ಛ'">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-stone-800 leading-tight">Kannada Chandas</h1>
+                    <p class="text-xs text-stone-500 font-medium">Prosody Analyzer & Identifier</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="toggleHistory()" class="flex items-center gap-2 px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg transition text-sm font-medium">
+                    <i class="fa-solid fa-clock-rotate-left"></i> History
+                </button>
+                <div class="hidden md:flex items-center gap-2 text-sm text-stone-500 bg-stone-100 px-3 py-1 rounded-full border border-stone-200">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    Backend: Flask
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- HISTORY SIDEBAR -->
+    <div id="history-sidebar" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-[60] border-l border-stone-200 overflow-y-auto">
+        <div class="p-4 border-b border-stone-200 flex justify-between items-center bg-stone-50">
+            <h3 class="font-bold text-lg text-stone-800"><i class="fa-solid fa-database mr-2 text-amber-600"></i>Saved Verses</h3>
+            <button onclick="toggleHistory()" class="text-stone-400 hover:text-red-500"><i class="fa-solid fa-times text-xl"></i></button>
+        </div>
+        <div id="history-list" class="p-4 space-y-3">
+            <p class="text-center text-stone-400 text-sm mt-10">Loading...</p>
+        </div>
+    </div>
+    <!-- Overlay for sidebar -->
+    <div id="history-overlay" onclick="toggleHistory()" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-[55] hidden transition-opacity"></div>
+
+    <main class="flex-grow max-w-5xl mx-auto w-full p-4 md:p-8 space-y-8">
+        <section class="animate-slide-up no-print" style="animation-delay: 0.1s;">
+            <div class="bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden">
+                <div class="p-1 bg-stone-50 border-b border-stone-200 flex justify-between items-center px-4 py-2">
+                    <label class="text-xs font-bold text-stone-500 uppercase tracking-wider">Input Text</label>
+                    <div class="flex gap-2">
+                        <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageUpload(this)">
+                        <button onclick="document.getElementById('image-upload').click()" class="text-xs px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-800 rounded hover:bg-amber-100 transition-colors flex items-center gap-1">
+                            <i class="fa-solid fa-camera"></i> Scan Image
+                        </button>
+                        <div class="w-px h-4 bg-stone-300 mx-1"></div>
+                        <button onclick="loadExample('kanda')" class="text-xs px-3 py-1.5 bg-white border border-stone-300 rounded hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 transition-colors">Kanda Padya</button>
+                        <button onclick="loadExample('poem')" class="text-xs px-3 py-1.5 bg-white border border-stone-300 rounded hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 transition-colors font-bold text-amber-700 bg-amber-50 border-amber-200">Full Poem</button>
+                    </div>
+                </div>
+                
+                <div class="relative group">
+                    <textarea id="input-text" rows="5" class="w-full p-6 text-lg md:text-xl font-serif leading-relaxed text-stone-700 focus:outline-none focus:ring-0 bg-transparent resize-y min-h-[150px]" placeholder="ಪದ್ಯವನ್ನು ಇಲ್ಲಿ ಬರೆಯಿರಿ... (Paste your Kannada poem here)"></textarea>
+                    <div class="absolute bottom-4 right-4 flex items-center gap-3 opacity-100 transition-opacity">
+                        <span id="char-count" class="text-xs text-stone-400 font-mono">0 chars</span>
+                        <button onclick="analyzeText()" id="analyze-btn" class="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-6 py-2.5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 font-medium group">
+                            <i class="fa-solid fa-wand-magic-sparkles group-hover:animate-pulse"></i> Analyze
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="error-banner" class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-3 animate-fade-in">
+                <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
+                <div id="error-text"><span class="font-bold">Connection Failed:</span> Ensure <code>app.py</code> is running on port 5000.</div>
+            </div>
+            <!-- Success Toast -->
+            <div id="toast" class="hidden fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-stone-800 text-white px-6 py-3 rounded-full shadow-2xl z-[70] flex items-center gap-3 animate-fade-in">
+                <i class="fa-solid fa-check-circle text-green-400"></i>
+                <span id="toast-msg">Saved to History</span>
+            </div>
+        </section>
+
+        <div id="loader" class="hidden py-12 flex flex-col items-center justify-center text-stone-400 animate-fade-in">
+            <div class="w-12 h-12 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin mb-4"></div>
+            <p id="loader-text" class="text-sm font-medium">Scanning stanzas...</p>
+        </div>
+
+        <section id="results-area" class="hidden space-y-6 pb-12">
+            <div class="animate-slide-up relative overflow-hidden bg-gradient-to-br from-amber-700 to-amber-900 rounded-2xl shadow-xl text-white p-6 md:p-8">
+                <div class="absolute top-0 right-0 opacity-10 transform translate-x-1/4 -translate-y-1/4"><i class="fa-solid fa-feather-pointed text-9xl"></i></div>
+                <div class="relative z-10">
+                    <div class="text-amber-200 text-xs font-bold tracking-[0.2em] uppercase mb-2">Analysis Complete</div>
+                    <div class="flex flex-col md:flex-row md:items-end gap-4 justify-between">
+                        <div>
+                            <h2 id="overall-status" class="text-3xl md:text-4xl font-serif font-bold mb-1">Results Ready</h2>
+                            <p class="text-amber-100/80 text-sm">Review the stanzas below</p>
+                        </div>
+                        <div class="flex items-end gap-3">
+                            <!-- SAVE BUTTON -->
+                            <button onclick="saveResult()" class="no-print h-full px-4 py-3 bg-emerald-600/20 hover:bg-emerald-600/40 backdrop-blur-sm border border-emerald-400/30 rounded-lg text-white transition-colors flex flex-col items-center justify-center gap-1 min-w-[80px] group">
+                                <i class="fa-solid fa-floppy-disk text-xl group-hover:scale-110 transition-transform"></i>
+                                <span class="text-[10px] uppercase tracking-wider font-bold">Save</span>
+                            </button>
+                            
+                            <!-- PDF BUTTON -->
+                            <button onclick="downloadPDF()" class="no-print h-full px-4 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-lg text-white transition-colors flex flex-col items-center justify-center gap-1 min-w-[80px] group">
+                                <i class="fa-solid fa-file-arrow-down text-xl group-hover:-translate-y-0.5 transition-transform"></i>
+                                <span class="text-[10px] uppercase tracking-wider font-bold">PDF</span>
+                            </button>
+                            
+                            <div class="text-center bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 min-w-[100px]">
+                                <div class="text-xs text-amber-200 uppercase tracking-wider mb-1">Stanzas</div>
+                                <div id="total-stanzas" class="text-2xl font-bold font-mono">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="stanzas-container" class="space-y-12"></div>
+        </section>
+    </main>
+
+    <footer class="mt-auto border-t border-stone-200 bg-white/50 py-6 text-center text-sm text-stone-500 backdrop-blur-sm no-print">
+        <p>&copy; Kannada Chandas Identifier 2025</p>
+        <p class="mt-1 flex items-center justify-center gap-1">Made with <i class="fa-solid fa-heart text-red-500 animate-pulse"></i> for <span class="font-bold text-amber-700 font-serif">ಕನ್ನಡ</span></p>
+    </footer>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000';
+        const API_URL = `${API_BASE}/analyze`;
+        const OCR_URL = `${API_BASE}/ocr`;
+        const SAVE_URL = `${API_BASE}/save`;
+        const HISTORY_URL = `${API_BASE}/history`;
+
+        let currentResult = null; // Store result for saving
+
+        const textarea = document.getElementById('input-text');
+        const charCount = document.getElementById('char-count');
+        textarea.addEventListener('input', () => { charCount.textContent = `${textarea.value.length} chars`; });
+
+        // --- CORE ANALYSIS FUNCTIONS ---
+        async function analyzeText() {
+            const text = textarea.value.trim();
+            if (!text) return;
+            
+            // UI States
+            document.getElementById('analyze-btn').disabled = true;
+            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('results-area').classList.add('hidden');
+            document.getElementById('error-banner').classList.add('hidden');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                if (!response.ok) throw new Error('Network error');
+                const data = await response.json();
+                
+                currentResult = data; // Cache for saving
+                renderResults(data);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('error-text').innerHTML = `<span class="font-bold">Connection Failed:</span> Ensure app.py is running.`;
+                document.getElementById('error-banner').classList.remove('hidden');
+            } finally {
+                document.getElementById('analyze-btn').disabled = false;
+                document.getElementById('loader').classList.add('hidden');
+            }
+        }
+
+        function renderResults(data) {
+            const stanzas = data.stanzas || [];
+            document.getElementById('overall-status').textContent = stanzas.length === 1 ? stanzas[0].overallType : "Analysis Complete";
+            document.getElementById('total-stanzas').textContent = stanzas.length;
+            
+            const container = document.getElementById('stanzas-container');
+            container.innerHTML = '';
+
+            stanzas.forEach((stanza, sIndex) => {
+                const header = document.createElement('div');
+                header.className = "flex items-center gap-4 mt-8 mb-4 page-break-avoid";
+                header.innerHTML = `
+                    <div class="h-8 w-8 rounded-full bg-stone-800 text-white flex items-center justify-center font-bold text-sm shadow-md">${sIndex + 1}</div>
+                    <div><h3 class="text-xl font-bold text-stone-800">Stanza ${sIndex + 1}</h3><div class="text-sm font-medium text-amber-700">${stanza.overallType}</div></div>
+                    <div class="flex-grow h-px bg-stone-200 ml-4"></div>`;
+                container.appendChild(header);
+
+                const grid = document.createElement('div');
+                grid.className = "grid gap-4";
+                
+                stanza.lines.forEach((line, index) => {
+                    const card = document.createElement('div');
+                    card.className = "bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden hover:shadow-md transition-shadow page-break-avoid";
+                    
+                    const visuals = line.pattern.map(w => `
+                        <div class="flex flex-col items-center gap-1 group/mark">
+                            <div class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold ${w === '-' ? 'guru-badge' : 'laghu-badge'}">${w === '-' ? 'G' : 'L'}</div>
+                            <div class="w-1 h-1 rounded-full ${w === '-' ? 'bg-red-400' : 'bg-green-400'} opacity-20 group-hover/mark:opacity-100 transition-opacity"></div>
+                        </div>`).join('');
+                    
+                    const ganas = line.ganas.split('-').map(g => `<span class="px-1.5 py-0.5 bg-stone-100 text-stone-600 rounded text-[10px] font-mono border border-stone-200">${g}</span>`).join('');
+
+                    card.innerHTML = `
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="text-xs font-mono text-stone-400 select-none pt-1 mr-3">L${index + 1}</span>
+                                <p class="font-serif text-lg text-stone-800 leading-relaxed flex-grow">${line.line}</p>
+                                ${line.match !== "Unknown" ? `<span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800 ml-2 whitespace-nowrap"><i class="fa-solid fa-check mr-1"></i>${line.match}</span>` : ''}
+                            </div>
+                            <div class="bg-stone-50 rounded-lg p-3 border border-stone-100">
+                                <div class="flex flex-wrap items-center justify-between gap-2 mb-2 pb-2 border-b border-stone-200">
+                                    <div class="font-mono text-xs text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-100">${line.matras} Matras</div>
+                                    <div class="flex flex-wrap gap-0.5">${visuals}</div>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-1"><span class="text-[10px] uppercase font-bold text-stone-400 tracking-wider mr-1">Ganas:</span>${ganas}</div>
+                            </div>
+                        </div>`;
+                    grid.appendChild(card);
+                });
+                container.appendChild(grid);
+            });
+            
+            document.getElementById('results-area').classList.remove('hidden');
+            document.getElementById('results-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // --- DATABASE & HISTORY FUNCTIONS ---
+        async function saveResult() {
+            if (!currentResult || !textarea.value.trim()) return;
+            try {
+                const response = await fetch(SAVE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: textarea.value, result: currentResult })
+                });
+                if (response.ok) showToast("Verse saved successfully!");
+            } catch (err) { console.error(err); }
+        }
+
+        async function fetchHistory() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = '<p class="text-center text-stone-400 text-sm mt-4">Loading...</p>';
+            try {
+                const response = await fetch(HISTORY_URL);
+                const data = await response.json();
+                list.innerHTML = '';
+                if (data.length === 0) {
+                    list.innerHTML = '<p class="text-center text-stone-400 text-sm mt-4">No saved verses yet.</p>';
+                    return;
+                }
+                data.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = "bg-stone-50 hover:bg-white p-3 rounded-lg border border-stone-200 cursor-pointer transition-shadow hover:shadow-md";
+                    el.onclick = () => loadHistoryItem(item.full_text);
+                    el.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="font-bold text-xs text-amber-700 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded">${item.overall_type}</span>
+                            <span class="text-[10px] text-stone-400">${new Date(item.timestamp).toLocaleDateString()}</span>
+                        </div>
+                        <p class="text-sm text-stone-600 line-clamp-2 font-serif">${item.text}</p>
+                    `;
+                    list.appendChild(el);
+                });
+            } catch (err) {
+                list.innerHTML = '<p class="text-center text-red-400 text-sm mt-4">Failed to load history.</p>';
+            }
+        }
+
+        function loadHistoryItem(fullText) {
+            textarea.value = fullText;
+            textarea.dispatchEvent(new Event('input'));
+            toggleHistory(); // close sidebar
+            analyzeText(); // auto analyze
+        }
+
+        function toggleHistory() {
+            const sidebar = document.getElementById('history-sidebar');
+            const overlay = document.getElementById('history-overlay');
+            const isOpen = !sidebar.classList.contains('translate-x-full');
+            
+            if (isOpen) {
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                fetchHistory(); // Refresh list on open
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        // --- UTILS ---
+        async function handleImageUpload(input) {
+            if (!input.files[0]) return;
+            const formData = new FormData();
+            formData.append('image', input.files[0]);
+            
+            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('loader-text').textContent = "OCR Processing...";
+            document.getElementById('results-area').classList.add('hidden');
+
+            try {
+                const res = await fetch(OCR_URL, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+                textarea.value = data.text;
+                textarea.dispatchEvent(new Event('input'));
+            } catch (err) {
+                alert("OCR Error: " + err.message);
+            } finally {
+                document.getElementById('loader').classList.add('hidden');
+                input.value = '';
+            }
+        }
+
+        function loadExample(type) {
+            const examples = {
+                'kanda': `ಕಾವೇರಿಯಿಂದಮಾ ಗೋ\nದಾವರಿವರಮಿರ್ಪನಾಡದಾ ಕನ್ನಡದೊಳ್\nಭಾವಿಸಿದ ಜನಪದಂ ವಸು\nಧಾವಳಯ ವಿಲೀನ ವಿಶದ ವಿಷಯ ವಿಶೇಷಂ`,
+                'poem': `ನೆಲಕಿಟಿವೆನೆಂದು ಬಗೆದಿರೆ\nಚಲಕಿಟಿವೆಂ ಪಾಂಡುಸುತರೋಳೇನಲೆನಿದು ಪಾ||\nಟ್ಟೈಲೆನಗೇ ದಿನಪಸುತನಂ\nಕೊಲಿಸಿದ ನೆಲನೊಡನೆ ಮತ್ತೆ ಪುದುವಾಳ್ವೆಪೇನೇ||,\n\nಎನ್ನಣುಗಾಳನನ್ನಣುಗದಮ್ಮನನಿಕ್ಕಿದ ಪಾರ್ಥಭೀಮರು।\nಳ್ಳನ್ನೆಗಮೊಲ್ಲೆನನ್ನೊಡಲೊಳಿನ್ನಸುವುಳ್ಳಿನಮಜ್ಜ ಸಂಧಿಯಂ||`
+            };
+            textarea.value = examples[type] || "";
+            textarea.dispatchEvent(new Event('input'));
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('results-area');
+            const btns = element.querySelectorAll('button');
+            btns.forEach(b => b.style.display = 'none'); // Hide buttons
+            html2pdf().set({ margin: 10, filename: 'Chandas_Analysis.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save().then(() => btns.forEach(b => b.style.display = 'flex'));
+        }
+    </script>
+</body>
+</html>

@@ -1,6 +1,10 @@
 # **Kannada Chandas Identifier (ಕನ್ನಡ ಛಂದಸ್ಸು)**
 
 An AI-powered tool to analyze and identify the meter (Chandas) of Kannada poems. It supports text input and image scanning (OCR) to detect popular meters like **Kanda Padya**, **Shatpadi**, and various **Vruttas** (Utpalamala, Champakamala, etc.).
+<img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/38c2e389-26f9-4911-992b-d93841efc2ea" />
+<img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/75ab558d-0277-4b02-b4a4-5532907080ba" />
+
+
 
 [Click here to visit the App](https://kannada-chandas-identifier-phase-1-1.onrender.com/)
 
